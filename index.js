@@ -37,20 +37,18 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
 
     const userCollection = client.db("OddhayonCoaching").collection("users");
-    const movieCollection = client.db("sample_mflix").collection("comments");
+    const courseCollection = client
+      .db("OddhayonCoaching")
+      .collection("courses");
 
-
-
-     //jwt related api
-     app.post("/jwt", (req, res) => {
-        const user = req.body;
-        const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
-          expiresIn: "60h",
-        });
-        res.send({ token });
+    //jwt related api
+    app.post("/jwt", (req, res) => {
+      const user = req.body;
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: "60h",
       });
-
-
+      res.send({ token });
+    });
 
     //User Related API
     //user post , user save in database
@@ -64,31 +62,18 @@ async function run() {
       const result = await userCollection.insertOne(user);
       res.send(result);
     });
-       //get users
-       app.get("/users", async (req, res) => {
-        const result = await userCollection.find().toArray();
-        res.send(result);
-      });
+    //get users
+    app.get("/users", async (req, res) => {
+      const result = await userCollection.find().toArray();
+      res.send(result);
+    });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    //courses related API
+    //get course
+    app.get("/courses", async (req, res) => {
+      const result = await courseCollection.find().toArray();
+      res.send(result);
+    });
 
     //finish
     console.log(
