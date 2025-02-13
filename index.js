@@ -74,6 +74,12 @@ async function run() {
       const result = await courseCollection.find().toArray();
       res.send(result);
     });
+    //add a course by admin
+    app.post("/course", async (req, res) => {
+      const course = req.body;
+      const result = await courseCollection.insertOne(course);
+      res.send(result);
+    });
 
     //finish
     console.log(
