@@ -89,6 +89,57 @@ async function run() {
       res.send(result);
     });
 
+    //update a course
+
+    app.patch("/course/:id",  async (req, res) => {
+      const { id } = req.params;
+      const updatedCourseData = req.body;
+    
+      const filter = { _id: new ObjectId(id) };
+      const updatedCourseDoc = {
+        $set: {
+          title: updatedCourseData.title,
+          class: updatedCourseData.class,
+          version: updatedCourseData.version,
+          subjects: updatedCourseData.subjects,
+          duration: updatedCourseData.duration,
+          fee: updatedCourseData.fee,
+          description: updatedCourseData.description,
+          contact: updatedCourseData.contact,
+          time: updatedCourseData.time,
+          location: updatedCourseData.location,
+          days: updatedCourseData.days,
+          facilities: updatedCourseData.facilities,
+          image: updatedCourseData.image,
+          date: updatedCourseData.date 
+        },
+      };
+      const result = await courseCollection.updateOne(filter, updatedCourseDoc);
+    
+      if (result.modifiedCount > 0) {
+        res.status(200).json({
+          message: "Course updated successfully!",
+          modifiedCount: result.modifiedCount,
+        });
+      } else if (result.matchedCount === 0) {
+        res.status(404).json({
+          message: "Course not found.",
+        });
+      } else {
+        res.status(400).json({
+          message: "No changes were made.",
+        });
+      }
+    });
+     //delete a course
+     app.delete("/course/:id", async(req,res)=>{
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)};
+      const result = await courseCollection.deleteOne(query);
+      res.send(result);
+    })
+    
+
     //finish
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
