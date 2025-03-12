@@ -37,6 +37,9 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
 
     const userCollection = client.db("OddhayonCoaching").collection("users");
+    const routineCollection = client
+      .db("OddhayonCoaching")
+      .collection("classRoutine");
     const courseCollection = client
       .db("OddhayonCoaching")
       .collection("courses");
@@ -49,7 +52,7 @@ async function run() {
       });
       res.send({ token });
     });
-    
+
     //single User APi
     app.get("/users/:email", async (req, res) => {
       const email = req.params.email;
@@ -91,10 +94,10 @@ async function run() {
 
     //update a course
 
-    app.patch("/course/:id",  async (req, res) => {
+    app.patch("/course/:id", async (req, res) => {
       const { id } = req.params;
       const updatedCourseData = req.body;
-    
+
       const filter = { _id: new ObjectId(id) };
       const updatedCourseDoc = {
         $set: {
@@ -111,11 +114,11 @@ async function run() {
           days: updatedCourseData.days,
           facilities: updatedCourseData.facilities,
           image: updatedCourseData.image,
-          date: updatedCourseData.date 
+          date: updatedCourseData.date,
         },
       };
       const result = await courseCollection.updateOne(filter, updatedCourseDoc);
-    
+
       if (result.modifiedCount > 0) {
         res.status(200).json({
           message: "Course updated successfully!",
@@ -131,15 +134,40 @@ async function run() {
         });
       }
     });
-     //delete a course
-     app.delete("/course/:id", async(req,res)=>{
+    //delete a course
+    app.delete("/course/:id", async (req, res) => {
       const id = req.params.id;
-      const query = {_id: new ObjectId(id)};
+      const query = { _id: new ObjectId(id) };
       const result = await courseCollection.deleteOne(query);
       res.send(result);
-    })
-    
+    });
 
+    //Routine related routes
+    app.get("/routines", async (req, res) => {
+      const result = await routineCollection.find().toArray();
+      res.send(result);
+    });
+
+    app.patch("/routines/:className/:version", async (req, res) => {
+      const className = req.params.className.replace("%20", " "); // URL encode ফিক্স
+      const version = req.params.version;
+    
+      const { schedule } = req.body;
+    
+      const filter = { class: className, "subjects.name": version };
+      const update = { $set: { "subjects.$.schedule": schedule } };
+    
+      const result = await routineCollection.findOneAndUpdate(filter, update, {
+        returnDocument: "after",
+      });
+    
+      if (!result.value) {
+        return res.status(404).json({ success: false, message: `Routine for ${className} - ${version} not found` });
+      }
+    
+      res.status(200).json({ success: true, data: result.value });
+    });
+    
     //finish
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
