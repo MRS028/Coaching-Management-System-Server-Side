@@ -37,6 +37,7 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
 
     const userCollection = client.db("OddhayonCoaching").collection("users");
+    const studentCollection = client.db("OddhayonCoaching").collection("allStudents");
     const routineCollection = client
       .db("OddhayonCoaching")
       .collection("classRoutine");
@@ -149,7 +150,7 @@ async function run() {
     });
 
     app.patch("/routines/:className/:version", async (req, res) => {
-      const className = req.params.className.replace("%20", " "); // URL encode ফিক্স
+      const className = req.params.className.replace("%20", " "); 
       const version = req.params.version;
     
       const { schedule } = req.body;
@@ -167,6 +168,13 @@ async function run() {
     
       res.status(200).json({ success: true, data: result.value });
     });
+    //student related api
+
+    app.get("/allStudents", async(req,res)=>{
+      const result = await studentCollection.find().toArray();
+      res.send(result);
+
+    })
     
     //finish
     console.log(
