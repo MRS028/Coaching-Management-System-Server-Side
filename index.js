@@ -12,7 +12,9 @@ const port = process.env.PORT || 5000;
 //middleware
 app.use(
   cors({
-    origin: ["http://localhost:5173"],
+    origin: ["http://localhost:5173",
+      "https://oddhayon-coaching-center.netlify.app"
+    ],
     credentials: true,
   })
 );
@@ -175,6 +177,33 @@ async function run() {
       res.send(result);
 
     })
+    //Enrollment related api for all students
+    app.post("/enrollments", async (req, res) => {
+      const course = req.body;
+      const studentID = course.studentID;
+    
+      // console.log("Received Data:", course);
+    
+      try {
+        const existing = await studentCollection.findOne({ studentID });
+    
+        if (existing) {
+          return res.status(400).send({ error: true, message: "Student already enrolled with this ID." });
+        }
+    
+        const result = await studentCollection.insertOne(course);
+        res.send({ insertedId: result.insertedId });
+      } catch (error) {
+        console.error("Database Error:", error);
+        res.status(500).send({ error: true, message: "Server error" });
+      }
+    });
+    
+    
+
+
+
+
     
     //finish
     console.log(
